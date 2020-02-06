@@ -1,0 +1,169 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 50;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		3012950323EC03FC00C552A6 /* Lighting.metal in Sources */ = {isa = PBXBuildFile; fileRef = 3012950223EC03FC00C552A6 /* Lighting.metal */; };
+		30C6C5BC23AA58C500A1197E /* SimpleMapVertex.metal in Sources */ = {isa = PBXBuildFile; fileRef = 30C6C5BB23AA58C500A1197E /* SimpleMapVertex.metal */; };
+		30E54D0123A2627C00BDE3BD /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 30E54D0023A2627C00BDE3BD /* Shaders.metal */; };
+		30E54D0823A262A600BDE3BD /* Kernel.metal in Sources */ = {isa = PBXBuildFile; fileRef = 30E54D0723A262A600BDE3BD /* Kernel.metal */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		3012950223EC03FC00C552A6 /* Lighting.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Lighting.metal; sourceTree = "<group>"; };
+		30C6C5BB23AA58C500A1197E /* SimpleMapVertex.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = SimpleMapVertex.metal; sourceTree = "<group>"; };
+		30E54D0023A2627C00BDE3BD /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
+		30E54D0723A262A600BDE3BD /* Kernel.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Kernel.metal; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		30E54CF823A2627C00BDE3BD = {
+			isa = PBXGroup;
+			children = (
+				30E54CFF23A2627C00BDE3BD /* Shaders */,
+			);
+			sourceTree = "<group>";
+		};
+		30E54CFF23A2627C00BDE3BD /* Shaders */ = {
+			isa = PBXGroup;
+			children = (
+				3012950223EC03FC00C552A6 /* Lighting.metal */,
+				30C6C5BB23AA58C500A1197E /* SimpleMapVertex.metal */,
+				30E54D0023A2627C00BDE3BD /* Shaders.metal */,
+				30E54D0723A262A600BDE3BD /* Kernel.metal */,
+			);
+			path = Shaders;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		30E54CFE23A2627C00BDE3BD /* Shaders */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 30E54D0423A2627C00BDE3BD /* Build configuration list for PBXNativeTarget "Shaders" */;
+			buildPhases = (
+				30E54CFD23A2627C00BDE3BD /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Shaders;
+			productName = Shaders;
+			productType = "com.apple.product-type.metal-library";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		30E54CF923A2627C00BDE3BD /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 1110;
+				ORGANIZATIONNAME = oktet;
+				TargetAttributes = {
+					30E54CFE23A2627C00BDE3BD = {
+						CreatedOnToolsVersion = 11.1;
+					};
+				};
+			};
+			buildConfigurationList = 30E54CFC23A2627C00BDE3BD /* Build configuration list for PBXProject "Shaders" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 30E54CF823A2627C00BDE3BD;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				30E54CFE23A2627C00BDE3BD /* Shaders */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		30E54CFD23A2627C00BDE3BD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				30E54D0823A262A600BDE3BD /* Kernel.metal in Sources */,
+				3012950323EC03FC00C552A6 /* Lighting.metal in Sources */,
+				30C6C5BC23AA58C500A1197E /* SimpleMapVertex.metal in Sources */,
+				30E54D0123A2627C00BDE3BD /* Shaders.metal in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		30E54D0223A2627C00BDE3BD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		30E54D0323A2627C00BDE3BD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		30E54D0523A2627C00BDE3BD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = UA77NU6ZSR;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		30E54D0623A2627C00BDE3BD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = UA77NU6ZSR;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		30E54CFC23A2627C00BDE3BD /* Build configuration list for PBXProject "Shaders" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				30E54D0223A2627C00BDE3BD /* Debug */,
+				30E54D0323A2627C00BDE3BD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		30E54D0423A2627C00BDE3BD /* Build configuration list for PBXNativeTarget "Shaders" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				30E54D0523A2627C00BDE3BD /* Debug */,
+				30E54D0623A2627C00BDE3BD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 30E54CF923A2627C00BDE3BD /* Project object */;
+}
