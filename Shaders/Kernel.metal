@@ -9,6 +9,7 @@
 #include <metal_stdlib>
 
 
+
 using namespace metal;
 /// This is a Metal Shading Language (MSL) function equivalent to the add_arrays() C function, used to perform the calculation on a GPU.
 kernel void add_arrays(device const char* inA,
@@ -33,4 +34,10 @@ kernel void add_arrays_simd(device const float4* inA,
     result[index] = inA[index];
     result[index].x /= inB[index].x;
     indicies[index] = index;
+}
+
+kernel void testinterpolate() {
+//    simd_float2 one = simd_float2(0, 0);
+//    simd_float2 two = simd_float2(4, 4);
+//    simd_float2 result = mix(<#metal::float2 x#>, <#metal::float2 y#>, <#metal::float2 a#>)
 }

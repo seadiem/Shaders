@@ -59,6 +59,7 @@ struct OutVertex
     // and then passes the interpolated value to the fragment shader for each
     // fragment in the triangle.
     float4 color;
+    bool  toLights;
     
 };
 
@@ -66,7 +67,8 @@ vertex OutVertex vertexLightingShader(uint vertexID [[vertex_id]],
                      constant float3 *vertices [[buffer(0)]],
                      constant float3 *normals [[buffer(1)]],
                      constant float3 *colors[[buffer(2)]],
-              constant simd_float4x4 *matricies[[buffer(3)]])
+              constant simd_float4x4 *matricies[[buffer(3)]],
+                       constant bool *tolifgts[[buffer(4)]])
 {
     
     simd_float4x4 projectionMatrix = matricies[0];
@@ -90,11 +92,13 @@ vertex OutVertex vertexLightingShader(uint vertexID [[vertex_id]],
     out.eye =  -(modelViewMatrix * position4).xyz;    
     out.normal = normalMatrix * normals[vertexID];
     
+    out.toLights = tolifgts[0];
+    
     return out;
 }
 
-fragment float4 fragment_light(OutVertex vert [[stage_in]])
-{
+fragment float4 fragment_light(OutVertex vert [[stage_in]]) {
+    
     float3 ambientTerm = light.ambientColor * material.ambientColor;
     
     float3 normal = normalize(vert.normal);
@@ -111,6 +115,32 @@ fragment float4 fragment_light(OutVertex vert [[stage_in]])
         float specularFactor = pow(saturate(dot(normal, halfway)), material.specularPower);
         specularTerm = light.specularColor * material.specularColor * specularFactor;
     }
+    
+    if (vert.toLights == true) { return float4(ambientTerm + diffuseTerm + specularTerm, 1); }
+    else { return vert.color; }
+}
+
+fragment float4 fragment_light_no_specular(OutVertex vert [[stage_in]])
+{
+    float3 ambientTerm = light.ambientColor * material.ambientColor;
+    
+    float3 normal = normalize(vert.normal);
+    
+    float diffuseIntensity = saturate(dot(normal, light.direction));
+    float3 diffuseTerm = light.diffuseColor * vert.color.rgb * diffuseIntensity;
+    //    float3 diffuseTerm = light.diffuseColor * material.diffuseColor * diffuseIntensity;
+    
+    float3 specularTerm(0);
+    if (diffuseIntensity > 0)
+    {
+        float3 eyeDirection = normalize(vert.eye);
+        float3 halfway = normalize(light.direction + eyeDirection);
+        float specularFactor = pow(saturate(dot(normal, halfway)), material.specularPower);
+        specularTerm = light.specularColor * material.specularColor * specularFactor;
+    }
+    specularTerm[0] = 0.2;
+    specularTerm[1] = 0.2;
+    specularTerm[2] = 0.2;
     return float4(ambientTerm + diffuseTerm + specularTerm, 1);
 }
 
