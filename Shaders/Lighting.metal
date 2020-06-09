@@ -63,6 +63,40 @@ struct OutVertex
     
 };
 
+
+vertex OutVertex vertexLightingShaderAlpha(uint vertexID [[vertex_id]],
+                                      constant float3 *vertices [[buffer(0)]],
+                                      constant float3 *normals [[buffer(1)]],
+                                      constant float4 *colors[[buffer(2)]],
+                                      constant simd_float4x4 *matricies[[buffer(3)]],
+                                      constant bool *tolifgts[[buffer(4)]])
+{
+    
+    simd_float4x4 projectionMatrix = matricies[0];
+    simd_float4x4 viewMatrix = matricies[1];
+    simd_float4x4 modelMatrix = matricies[2];
+    simd_float4x4 transformMatrix = projectionMatrix * viewMatrix * modelMatrix;
+    
+    float3 position3 = vertices[vertexID];
+    float4 position4;
+    position4.xyz = position3;
+    position4.w = 1.0;
+    
+    OutVertex out;
+    out.position = transformMatrix * position4;
+    out.color = colors[vertexID];
+    out.pointsize = 5;
+    
+    simd_float4x4 modelViewMatrix = viewMatrix * modelMatrix;
+    simd_float3x3 normalMatrix = matrix_float4x4_extract_linear(modelViewMatrix);
+    out.eye =  -(modelViewMatrix * position4).xyz;    
+    out.normal = normalMatrix * normals[vertexID];
+    
+    out.toLights = tolifgts[0];
+    
+    return out;
+}
+
 vertex OutVertex vertexLightingShader(uint vertexID [[vertex_id]],
                      constant float3 *vertices [[buffer(0)]],
                      constant float3 *normals [[buffer(1)]],
@@ -116,7 +150,7 @@ fragment float4 fragment_light(OutVertex vert [[stage_in]]) {
         specularTerm = light.specularColor * material.specularColor * specularFactor;
     }
     
-    if (vert.toLights == true) { return float4(ambientTerm + diffuseTerm + specularTerm, 1); }
+    if (vert.toLights == true) { return float4(ambientTerm + diffuseTerm + specularTerm, vert.color.a); }
     else { return vert.color; }
 }
 
