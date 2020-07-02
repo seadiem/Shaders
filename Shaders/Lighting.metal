@@ -53,6 +53,7 @@ struct OutVertex
     
     float3 eye;
     float3 normal;
+    float2 uv;
     
     // Since this member does not have a special attribute, the rasterizer
     // interpolates its value with the values of the other triangle vertices
@@ -60,9 +61,51 @@ struct OutVertex
     // fragment in the triangle.
     float4 color;
     bool  toLights;
+    bool hasTexture;
+    int textureNumber;
     
 };
 
+
+vertex OutVertex vertexLightingShaderAlphaTexture(uint vertexID [[vertex_id]],
+                                                  constant float3 *vertices [[buffer(0)]],
+                                                  constant float3 *normals [[buffer(1)]],
+                                                  constant float4 *colors[[buffer(2)]],
+                                                  constant simd_float4x4 *matricies[[buffer(3)]],
+                                                  constant bool *tolifgts[[buffer(4)]],
+                                                  constant float2 *uv[[buffer(5)]],
+                                                  constant bool *hasTexture[[buffer(6)]],
+                                                  constant int *textureNumber[[buffer(7)]])
+{
+    
+    simd_float4x4 projectionMatrix = matricies[0];
+    simd_float4x4 viewMatrix = matricies[1];
+    simd_float4x4 modelMatrix = matricies[2];
+    simd_float4x4 transformMatrix = projectionMatrix * viewMatrix * modelMatrix;
+    
+    float3 position3 = vertices[vertexID];
+    float4 position4;
+    position4.xyz = position3;
+    position4.w = 1.0;
+    
+    OutVertex out;
+    out.position = transformMatrix * position4;
+    out.color = colors[vertexID];
+    out.pointsize = 5;
+    
+    simd_float4x4 modelViewMatrix = viewMatrix * modelMatrix;
+    simd_float3x3 normalMatrix = matrix_float4x4_extract_linear(modelViewMatrix);
+    out.eye =  -(modelViewMatrix * position4).xyz;    
+    out.normal = normalMatrix * normals[vertexID];
+    
+    out.toLights = tolifgts[0];
+    
+    out.uv = uv[vertexID];
+    out.hasTexture = hasTexture[0];
+    out.textureNumber = textureNumber[vertexID];
+    
+    return out;
+}
 
 vertex OutVertex vertexLightingShaderAlpha(uint vertexID [[vertex_id]],
                                       constant float3 *vertices [[buffer(0)]],
@@ -129,6 +172,44 @@ vertex OutVertex vertexLightingShader(uint vertexID [[vertex_id]],
     out.toLights = tolifgts[0];
     
     return out;
+}
+
+fragment float4 fragment_light_texture(OutVertex vert [[stage_in]], 
+                                       texture2d<float> diffuseTexture [[texture(0)]], 
+                                       sampler samplr [[sampler(0)]]) {
+    
+    float3 ambientTerm = light.ambientColor * material.ambientColor;
+    float3 textureColor = diffuseTexture.sample(samplr, vert.uv).rgb;
+    
+    float3 normal = normalize(vert.normal);
+    float diffuseIntensity = saturate(dot(normal, light.direction));
+    float3 diffuseTerm = textureColor * light.diffuseColor * 1.0 * diffuseIntensity;
+//    float3 diffuseTerm = light.diffuseColor * textureColor * diffuseIntensity;
+    return float4(textureColor, 0.5);
+    
+//    return vert.color;
+
+    
+//    float3 specularTerm(0);
+//    if (diffuseIntensity > 0)
+//    {
+//        float3 eyeDirection = normalize(vert.eye);
+//        float3 halfway = normalize(light.direction + eyeDirection);
+//        float specularFactor = pow(saturate(dot(normal, halfway)), material.specularPower);
+//        specularTerm = light.specularColor * material.specularColor * specularFactor;
+//    }
+    
+    
+//    
+//    float3 textureColor = diffuseTexture.sample(samplr, vert.uv).rgb;
+//    return float4(textureColor.r, textureColor.b, textureColor.g, 1.0);
+    
+
+    
+//    if (vert.toLights == true) { return float4(ambientTerm + diffuseTerm + specularTerm, vert.color.a); }
+//    else {
+//        float4 a = float4(textureColor.r, textureColor.g, textureColor.b, 1); 
+//        return a; }
 }
 
 fragment float4 fragment_light(OutVertex vert [[stage_in]]) {
