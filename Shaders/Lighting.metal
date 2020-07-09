@@ -199,8 +199,9 @@ vertex OutVertex vertexLightingShaderAlphaTexture(uint vertexID [[vertex_id]],
                                                   constant simd_float4x4 *matricies[[buffer(3)]],
                                                   constant bool *tolifgts[[buffer(4)]],
                                                   constant float2 *uv[[buffer(5)]],
-                                                  constant bool *hasTexture[[buffer(6)]],
-                                                  constant int *textureNumber[[buffer(7)]])
+                                                  constant bool *hasTexture[[buffer(6)]]
+                                                  // constant int *textureNumber[[buffer(7)]]
+                                                  )
 {
     
     simd_float4x4 projectionMatrix = matricies[0];
@@ -229,7 +230,7 @@ vertex OutVertex vertexLightingShaderAlphaTexture(uint vertexID [[vertex_id]],
     out.hasTexture = hasTexture[0];
     out.hasTexture = true; //!
     out.toLights = false;
-    out.textureNumber = textureNumber[vertexID];
+//    out.textureNumber = textureNumber[vertexID];
     
     return out;
 }
@@ -328,7 +329,6 @@ fragment float4 fragment_light_texture(OutVertex vert [[stage_in]],
     
     if (vert.toLights == true) { return float4(ambientTerm + diffuseTerm + specularTerm, vert.color.a); }
     else { return pixelcolor; }
-    
 
 }
 
