@@ -36,20 +36,14 @@ constant MaterialTwo material = {
 
 struct OutVertexTwo
 {
-    // The [[position]] attribute of this member indicates that this value
-    // is the clip space position of the vertex when this structure is
-    // returned from the vertex function.
+
     float4 position [[position]];
     float pointsize[[point_size]];
     
     float3 eye;
     float3 normal;
-    float2 uv;
     
-    // Since this member does not have a special attribute, the rasterizer
-    // interpolates its value with the values of the other triangle vertices
-    // and then passes the interpolated value to the fragment shader for each
-    // fragment in the triangle.
+    float2 uv;
     float4 color;
     float4 material;
     bool  toLights;
@@ -74,7 +68,8 @@ vertex OutVertexTwo vertexLightingShaderAlphaTextureZero(uint vertexID [[vertex_
                                                         constant bool *tolifgts[[buffer(4)]],
                                                         constant float2 *uv[[buffer(5)]],
                                                         constant bool *hasTexture[[buffer(6)]],
-                                                        constant float4 *material[[buffer(7)]])
+                                                        constant float4 *material[[buffer(7)]],
+                                                        constant bool *ismesh[[buffer(8)]])
 {
     
     simd_float4x4 projectionMatrix = matricies[0];
@@ -97,12 +92,9 @@ vertex OutVertexTwo vertexLightingShaderAlphaTextureZero(uint vertexID [[vertex_
     out.eye =  -(modelViewMatrix * position4).xyz;    
     out.normal = normalMatrix * normals[vertexID];
     
-    out.toLights = tolifgts[0];
-    
     out.uv = uv[vertexID];
     out.hasTexture = hasTexture[0];
-    out.hasTexture = true; //!
-    out.toLights = false;
+    out.toLights = tolifgts[0];
     out.material = material[0];
     
     return out;
@@ -113,7 +105,7 @@ fragment float4 fragment_light_texture_zero(OutVertexTwo vert [[stage_in]],
                                            sampler samplr [[sampler(0)]]) {
     
     float4 pixelcolor;
-    if (vert.hasTexture) { pixelcolor = float4(diffuseTexture.sample(samplr, vert.uv).rgb, vert.color.a); } 
+    if (vert.hasTexture) { pixelcolor = float4(diffuseTexture.sample(samplr, vert.uv).rgba); } 
     else { pixelcolor = vert.color; }
     
     float3 ambientTerm = light.ambientColor * pixelcolor.rgb;
@@ -131,7 +123,7 @@ fragment float4 fragment_light_texture_zero(OutVertexTwo vert [[stage_in]],
         specularTerm = light.specularColor * material.specularColor * specularFactor;
     }
     
-    if (vert.toLights == true) { return float4(ambientTerm + diffuseTerm + specularTerm, vert.color.a); }
+    if (vert.toLights == true) { return float4(ambientTerm + diffuseTerm + specularTerm, pixelcolor.a); }
     else { return pixelcolor; }
     
 }
