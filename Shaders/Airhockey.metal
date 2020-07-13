@@ -67,7 +67,7 @@ vertex OutVertexTwo vertexLightingShaderAlphaTextureZero(uint vertexID [[vertex_
                                                         constant simd_float4x4 *matricies[[buffer(3)]],
                                                         constant bool *tolifgts[[buffer(4)]],
                                                         constant float2 *uv[[buffer(5)]],
-                                                        constant bool *hasTexture[[buffer(6)]],
+                                                        constant bool *verexHasTexture[[buffer(6)]],
                                                         constant float4 *material[[buffer(7)]],
                                                         constant bool *ismesh[[buffer(8)]])
 {
@@ -93,7 +93,7 @@ vertex OutVertexTwo vertexLightingShaderAlphaTextureZero(uint vertexID [[vertex_
     out.normal = normalMatrix * normals[vertexID];
     
     out.uv = uv[vertexID];
-    out.hasTexture = hasTexture[0];
+    out.hasTexture = verexHasTexture[vertexID];
     out.toLights = tolifgts[0];
     out.material = material[0];
     
@@ -104,14 +104,34 @@ fragment float4 fragment_light_texture_zero(OutVertexTwo vert [[stage_in]],
                                            texture2d<float> diffuseTexture [[texture(0)]], 
                                            sampler samplr [[sampler(0)]]) {
     
-    float4 pixelcolor;
-    if (vert.hasTexture) { pixelcolor = float4(diffuseTexture.sample(samplr, vert.uv).rgba); } 
-    else { pixelcolor = vert.color; }
+    bool lighting = true;
     
-    float3 ambientTerm = light.ambientColor * pixelcolor.rgb;
+    float4 pixelcolor;
+    if (vert.hasTexture) { 
+        pixelcolor = float4(diffuseTexture.sample(samplr, vert.uv).rgba);
+        if (pixelcolor.g > 0.9) {
+            lighting = false;
+        } 
+    }
+    else { 
+        pixelcolor = vert.color; 
+    }
+    
+    if (pixelcolor.a == 0) {
+        pixelcolor = vert.color;
+    }
+    
+    float3 ambientTerm = light.ambientColor * material.ambientColor;
     
     float3 normal = normalize(vert.normal);
+    float dk = 1;
+    if (vert.hasTexture) { dk = 0.5; }
     float diffuseIntensity = saturate(dot(normal, light.direction));
+    if (lighting == false) {
+        if (diffuseIntensity < 1) {
+            diffuseIntensity = 1;
+        }
+    }
     float3 diffuseTerm = light.diffuseColor * pixelcolor.rgb * diffuseIntensity;
     
     float3 specularTerm(0);
@@ -119,9 +139,13 @@ fragment float4 fragment_light_texture_zero(OutVertexTwo vert [[stage_in]],
     {
         float3 eyeDirection = normalize(vert.eye);
         float3 halfway = normalize(light.direction + eyeDirection);
-        float specularFactor = pow(saturate(dot(normal, halfway)), material.specularPower);
+        float specularFactor = pow(saturate(dot(normal, halfway)), material.specularPower) * dk;
         specularTerm = light.specularColor * material.specularColor * specularFactor;
     }
+    
+//    if (lighting == false) {
+//        vert.toLights = false;
+//    }
     
     if (vert.toLights == true) { return float4(ambientTerm + diffuseTerm + specularTerm, pixelcolor.a); }
     else { return pixelcolor; }
