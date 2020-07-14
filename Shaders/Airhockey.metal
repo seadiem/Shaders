@@ -48,6 +48,7 @@ struct OutVertexTwo
     float4 material;
     bool  toLights;
     bool hasTexture;
+//    bool bodyHasTexture;
     
 };
 
@@ -100,20 +101,25 @@ vertex OutVertexTwo vertexLightingShaderAlphaTextureZero(uint vertexID [[vertex_
     return out;
 }
 
-fragment float4 fragment_light_texture_zero(OutVertexTwo vert [[stage_in]], 
-                                           texture2d<float> diffuseTexture [[texture(0)]], 
-                                           sampler samplr [[sampler(0)]]) {
+fragment float4 fragment_light_texture_zero(OutVertexTwo vert [[stage_in]],
+                                            constant bool *hasTexture [[buffer(0)]],
+                                            constant float *specularF [[buffer(1)]],
+                                            constant float2 *darkFactor [[buffer(2)]],
+                                            texture2d<float> diffuseTexture [[texture(0)]], 
+                                            sampler samplr [[sampler(0)]]) {
     
     bool lighting = true;
+    bool totexturing = hasTexture[0];
+    float specularK = specularF[0];
+    float2 darkF = darkFactor[0];
     
     float4 pixelcolor;
-    if (vert.hasTexture) { 
+    if (vert.hasTexture && totexturing) { 
         pixelcolor = float4(diffuseTexture.sample(samplr, vert.uv).rgba);
         if (pixelcolor.g > 0.9) {
             lighting = false;
         } 
-    }
-    else { 
+    } else { 
         pixelcolor = vert.color; 
     }
     
@@ -125,27 +131,32 @@ fragment float4 fragment_light_texture_zero(OutVertexTwo vert [[stage_in]],
     
     float3 normal = normalize(vert.normal);
     float dk = 1;
-    if (vert.hasTexture) { dk = 0.5; }
+    if (vert.hasTexture && totexturing) { dk = 0.5; }
     float diffuseIntensity = saturate(dot(normal, light.direction));
     if (lighting == false) {
         if (diffuseIntensity < 1) {
             diffuseIntensity = 1;
         }
     }
-    float3 diffuseTerm = light.diffuseColor * pixelcolor.rgb * diffuseIntensity;
+    if (diffuseIntensity < 0.3 ) {
+        diffuseIntensity = 0.3;
+    }
+    
+    
+    float morelight = 1.0;
+    if (darkF.x > 0) { morelight = darkF.y; }
+    
+    float3 diffuseTerm = light.diffuseColor * pixelcolor.rgb * diffuseIntensity * morelight;
     
     float3 specularTerm(0);
     if (diffuseIntensity > 0)
     {
         float3 eyeDirection = normalize(vert.eye);
         float3 halfway = normalize(light.direction + eyeDirection);
-        float specularFactor = pow(saturate(dot(normal, halfway)), material.specularPower) * dk;
+        float specularFactor = pow(saturate(dot(normal, halfway)), material.specularPower) * dk * specularK;
         specularTerm = light.specularColor * material.specularColor * specularFactor;
     }
     
-//    if (lighting == false) {
-//        vert.toLights = false;
-//    }
     
     if (vert.toLights == true) { return float4(ambientTerm + diffuseTerm + specularTerm, pixelcolor.a); }
     else { return pixelcolor; }
