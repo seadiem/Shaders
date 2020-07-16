@@ -44,6 +44,7 @@ struct OutVertexTwo
     float3 normal;
     
     float2 uv;
+    int textnumber;
     float4 color;
     float4 material;
     bool  toLights;
@@ -67,7 +68,7 @@ vertex OutVertexTwo vertexLightingShaderAlphaTextureZero(uint vertexID [[vertex_
                                                         constant float4 *colors[[buffer(2)]],
                                                         constant simd_float4x4 *matricies[[buffer(3)]],
                                                         constant bool *tolifgts[[buffer(4)]],
-                                                        constant float2 *uv[[buffer(5)]],
+                                                        constant float3 *uv[[buffer(5)]],
                                                         constant bool *verexHasTexture[[buffer(6)]],
                                                         constant float4 *material[[buffer(7)]],
                                                         constant bool *ismesh[[buffer(8)]])
@@ -93,7 +94,8 @@ vertex OutVertexTwo vertexLightingShaderAlphaTextureZero(uint vertexID [[vertex_
     out.eye =  -(modelViewMatrix * position4).xyz;    
     out.normal = normalMatrix * normals[vertexID];
     
-    out.uv = uv[vertexID];
+    out.uv = uv[vertexID].xy;
+    out.textnumber = int(uv[vertexID].z);
     out.hasTexture = verexHasTexture[vertexID];
     out.toLights = tolifgts[0];
     out.material = material[0];
@@ -105,7 +107,8 @@ fragment float4 fragment_light_texture_zero(OutVertexTwo vert [[stage_in]],
                                             constant bool *hasTexture [[buffer(0)]],
                                             constant float *specularF [[buffer(1)]],
                                             constant float2 *darkFactor [[buffer(2)]],
-                                            texture2d<float> diffuseTexture [[texture(0)]], 
+                                            texture2d<float> diffuseTexture0 [[texture(0)]],
+                                            texture2d<float> diffuseTexture1 [[texture(1)]], 
                                             sampler samplr [[sampler(0)]]) {
     
     bool lighting = true;
@@ -114,8 +117,12 @@ fragment float4 fragment_light_texture_zero(OutVertexTwo vert [[stage_in]],
     float2 darkF = darkFactor[0];
     
     float4 pixelcolor;
-    if (vert.hasTexture && totexturing) { 
-        pixelcolor = float4(diffuseTexture.sample(samplr, vert.uv).rgba);
+    if (vert.hasTexture && totexturing) {
+        texture2d<float> texture;
+        if (vert.textnumber == 0) { texture = diffuseTexture0; }
+        else if (vert.textnumber == 1) { texture = diffuseTexture1; }
+        else { texture = diffuseTexture0; }
+        pixelcolor = float4(texture.sample(samplr, vert.uv).rgba);
         if (pixelcolor.g > 0.9) {
             lighting = false;
         } 
