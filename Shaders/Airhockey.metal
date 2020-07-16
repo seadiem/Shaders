@@ -49,7 +49,6 @@ struct OutVertexTwo
     float4 material;
     bool  toLights;
     bool hasTexture;
-//    bool bodyHasTexture;
     
 };
 
