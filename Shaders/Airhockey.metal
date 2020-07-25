@@ -107,7 +107,8 @@ fragment float4 fragment_light_texture_zero(OutVertexTwo vert [[stage_in]],
                                             constant float *specularF [[buffer(1)]],
                                             constant float2 *darkFactor [[buffer(2)]],
                                             texture2d<float> diffuseTexture0 [[texture(0)]],
-                                            texture2d<float> diffuseTexture1 [[texture(1)]], 
+                                            texture2d<float> diffuseTexture1 [[texture(1)]],
+                                            texture2d<float> diffuseTexture2 [[texture(2)]],
                                             sampler samplr [[sampler(0)]]) {
     
     bool lighting = true;
@@ -120,6 +121,7 @@ fragment float4 fragment_light_texture_zero(OutVertexTwo vert [[stage_in]],
         texture2d<float> texture;
         if (vert.textnumber == 0) { texture = diffuseTexture0; }
         else if (vert.textnumber == 1) { texture = diffuseTexture1; }
+        else if (vert.textnumber == 2) { texture = diffuseTexture2; }
         else { texture = diffuseTexture0; }
         pixelcolor = float4(texture.sample(samplr, vert.uv).rgba);
         if (pixelcolor.g > 0.9) {
