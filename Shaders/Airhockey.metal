@@ -169,4 +169,7 @@ fragment float4 fragment_light_texture_zero(OutVertexTwo vert [[stage_in]],
     if (vert.toLights == true) { return float4(ambientTerm + diffuseTerm + specularTerm, pixelcolor.a); }
     else { return pixelcolor; }
     
+    // k
+    // [-----/--] = 1
+    // lifgting / solid
 }
