@@ -173,3 +173,39 @@ fragment float4 fragment_light_texture_zero(OutVertexTwo vert [[stage_in]],
     // [-----/--] = 1
     // lifgting / solid
 }
+
+struct OutVertexDote
+{
+    float4 position [[position]];
+    float pointsize[[point_size]];
+    float4 color;    
+};
+
+vertex OutVertexDote doteVertex(uint vertexID [[vertex_id]],
+                                constant float3 *vertices [[buffer(0)]],
+                                constant float4 *colors[[buffer(2)]],
+                                constant simd_float4x4 *matricies[[buffer(3)]] )
+{
+    
+    simd_float4x4 projectionMatrix = matricies[0];
+    simd_float4x4 viewMatrix = matricies[1];
+    simd_float4x4 modelMatrix = matricies[2];
+    simd_float4x4 transformMatrix = projectionMatrix * viewMatrix * modelMatrix;
+    
+    float3 position3 = vertices[vertexID];
+    float4 position4;
+    position4.xyz = position3;
+    position4.w = 1.0;
+    
+    OutVertexDote out;
+    out.position = transformMatrix * position4;
+    out.color = colors[vertexID];
+    out.pointsize = 5;
+    
+    
+    return out;
+}
+
+fragment float4 doteFragment(OutVertexDote vert [[stage_in]]) {
+    return vert.color;
+}
