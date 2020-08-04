@@ -183,8 +183,8 @@ struct OutVertexDote
 
 vertex OutVertexDote doteVertex(uint vertexID [[vertex_id]],
                                 constant float3 *vertices [[buffer(0)]],
-                                constant float4 *colors[[buffer(2)]],
-                                constant simd_float4x4 *matricies[[buffer(3)]] )
+                                constant float4 *colors[[buffer(1)]],
+                                constant simd_float4x4 *matricies[[buffer(2)]] )
 {
     
     simd_float4x4 projectionMatrix = matricies[0];
@@ -200,7 +200,7 @@ vertex OutVertexDote doteVertex(uint vertexID [[vertex_id]],
     OutVertexDote out;
     out.position = transformMatrix * position4;
     out.color = colors[vertexID];
-    out.pointsize = 5;
+    out.pointsize = 1;
     
     
     return out;
