@@ -97,7 +97,7 @@ vertex OutVertexTwo vertexLightingShaderAlphaTextureZero(uint vertexID [[vertex_
     out.textnumber = int(uv[vertexID].z);
     out.hasTexture = verexHasTexture[vertexID];
     out.toLights = tolifgts[0];
-    out.material = material[0];
+    out.material = material[vertexID];
     
     return out;
 }
@@ -165,9 +165,26 @@ fragment float4 fragment_light_texture_zero(OutVertexTwo vert [[stage_in]],
         specularTerm = light.specularColor * material.specularColor * specularFactor;
     }
     
+    float4 shadedlight;
+    if (vert.toLights == true) { shadedlight = float4(ambientTerm + diffuseTerm + specularTerm, pixelcolor.a); }
+    else { shadedlight = pixelcolor; }
     
-    if (vert.toLights == true) { return float4(ambientTerm + diffuseTerm + specularTerm, pixelcolor.a); }
-    else { return pixelcolor; }
+//    if (vert.toLights == true) { return float4(ambientTerm + diffuseTerm + specularTerm, pixelcolor.a); }
+//    else { return pixelcolor; }
+    
+    float ballancex = vert.material.x;
+    float ballancey = vert.material.y;
+    
+//    float ballancex = 0.0;
+//    float ballancey = 1.0;
+    
+    float4 shadedlightbalanced = shadedlight * ballancex;
+    float4 initialballance = pixelcolor * ballancey;
+    float4 resultcolor = shadedlightbalanced + initialballance;
+    resultcolor.a = pixelcolor.a;
+    return resultcolor;
+    
+
     
     // k
     // [-----/--] = 1
