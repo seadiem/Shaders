@@ -114,6 +114,7 @@ fragment float4 fragment_light_texture_zero(OutVertexTwo vert [[stage_in]],
     bool lighting = true;
     bool totexturing = hasTexture[0];
     float specularK = specularF[0];
+//    specularK = 0.1;
     float2 darkF = darkFactor[0];
     
     float4 pixelcolor;
