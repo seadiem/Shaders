@@ -73,10 +73,10 @@ matrix_float3x3 matrix_float4x4_extract_linear_two(matrix_float4x4 m)
 
 vertex OutVertexThree chipVertexFunction(uint vertexID [[vertex_id]], 
                                          constant float3 *vertices [[buffer(0)]],
-                                         constant float3 *normals [[buffer(2)]],
-                                         constant float4 *colors[[buffer(3)]], 
-                                         constant simd_float4x4 *matricies[[buffer(4)]],
-                                         constant float4 *material[[buffer(5)]]) {
+                                         constant float3 *normals [[buffer(1)]],
+                                         constant float4 *colors[[buffer(2)]],
+                                         constant float4 *material[[buffer(3)]],
+                                         constant simd_float4x4 *matricies[[buffer(4)]]) {
     simd_float4x4 projectionMatrix = matricies[0];
     simd_float4x4 viewMatrix = matricies[1];
     simd_float4x4 modelMatrix = matricies[2];
