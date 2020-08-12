@@ -52,6 +52,16 @@ struct OutVertexTwo
     
 };
 
+struct OutVertexThree
+{
+    
+    float4 position [[position]];
+    float3 eye;
+    float3 normal;
+    float4 color;
+    float4 material;
+};
+
 matrix_float3x3 matrix_float4x4_extract_linear_two(matrix_float4x4 m)
 {
     vector_float3 X = m.columns[0].xyz;
@@ -59,6 +69,70 @@ matrix_float3x3 matrix_float4x4_extract_linear_two(matrix_float4x4 m)
     vector_float3 Z = m.columns[2].xyz;
     matrix_float3x3 l = { X, Y, Z };
     return l;
+}
+
+vertex OutVertexThree chipVertexFunction(uint vertexID [[vertex_id]], 
+                                         constant float3 *vertices [[buffer(0)]],
+                                         constant float3 *normals [[buffer(2)]],
+                                         constant float4 *colors[[buffer(3)]], 
+                                         constant simd_float4x4 *matricies[[buffer(4)]],
+                                         constant float4 *material[[buffer(5)]]) {
+    simd_float4x4 projectionMatrix = matricies[0];
+    simd_float4x4 viewMatrix = matricies[1];
+    simd_float4x4 modelMatrix = matricies[2];
+    simd_float4x4 transformMatrix = projectionMatrix * viewMatrix * modelMatrix;
+    
+    float3 position3 = vertices[vertexID];
+    float4 position4;
+    position4.xyz = position3;
+    position4.w = 1.0;
+    
+    OutVertexThree out;
+    out.position = transformMatrix * position4;
+    out.color = colors[vertexID];
+    
+    simd_float4x4 modelViewMatrix = viewMatrix * modelMatrix;
+    simd_float3x3 normalMatrix = matrix_float4x4_extract_linear_two(modelViewMatrix);
+    out.eye =  -(modelViewMatrix * position4).xyz;    
+    out.normal = normalMatrix * normals[vertexID];
+    out.material = material[vertexID];
+    
+    return out;
+}
+
+fragment float4 chipFragmentFunction(OutVertexThree vert [[stage_in]]) {
+    
+
+    
+    float4 pixelcolor = vert.color;    
+    float3 ambientTerm = light.ambientColor * material.ambientColor;
+    float3 normal = normalize(vert.normal);
+    float diffuseIntensity = saturate(dot(normal, light.direction));
+    float3 diffuseTerm = light.diffuseColor * pixelcolor.rgb * diffuseIntensity;
+    
+    float3 specularTerm(0);
+    if (diffuseIntensity > 0)
+    {
+        float3 eyeDirection = normalize(vert.eye);
+        float3 halfway = normalize(light.direction + eyeDirection);
+        float specularFactor = pow(saturate(dot(normal, halfway)), material.specularPower);
+        specularTerm = light.specularColor * material.specularColor * specularFactor;
+    }
+    
+    float4 shadedlight;
+    shadedlight = float4(ambientTerm + diffuseTerm + specularTerm, pixelcolor.a);
+    float ballancex = vert.material.x;
+    float ballancey = vert.material.y;
+    float4 shadedlightbalanced = shadedlight * ballancex;
+    float4 initialballance = pixelcolor * ballancey;
+    float4 resultcolor = shadedlightbalanced + initialballance;
+    resultcolor.a = pixelcolor.a;
+    return resultcolor;
+    
+    
+    // k
+    // [-----/--] = 1
+    // lifgting / solid
 }
 
 vertex OutVertexTwo vertexLightingShaderAlphaTextureZero(uint vertexID [[vertex_id]],
