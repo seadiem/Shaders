@@ -52,7 +52,7 @@ struct OutVertexTwo
     
 };
 
-struct OutVertexThree
+struct OutVertexChip
 {
     
     float4 position [[position]];
@@ -60,6 +60,18 @@ struct OutVertexThree
     float3 normal;
     float4 color;
     float4 material;
+};
+
+struct OutVertexTable
+{
+    float4 position [[position]];
+    float3 eye;
+    float3 normal;
+    float4 color;
+    float4 material;
+    float2 uv;
+    bool hasTexture;
+    int textnumber;
 };
 
 matrix_float3x3 matrix_float4x4_extract_linear_two(matrix_float4x4 m)
@@ -71,7 +83,118 @@ matrix_float3x3 matrix_float4x4_extract_linear_two(matrix_float4x4 m)
     return l;
 }
 
-vertex OutVertexThree chipVertexFunction(uint vertexID [[vertex_id]], 
+vertex OutVertexTable tableVertexFunction(uint vertexID [[vertex_id]], 
+                                         constant float3 *vertices [[buffer(0)]],
+                                         constant float3 *normals [[buffer(1)]],
+                                         constant float4 *colors[[buffer(2)]],
+                                         constant float4 *material[[buffer(3)]],
+                                         constant simd_float4x4 *matricies[[buffer(4)]],
+                                         constant bool *verexHasTexture[[buffer(5)]],
+                                         constant float3 *uv[[buffer(6)]]) {
+    simd_float4x4 projectionMatrix = matricies[0];
+    simd_float4x4 viewMatrix = matricies[1];
+    simd_float4x4 modelMatrix = matricies[2];
+    simd_float4x4 transformMatrix = projectionMatrix * viewMatrix * modelMatrix;
+    
+    float3 position3 = vertices[vertexID];
+    float4 position4;
+    position4.xyz = position3;
+    position4.w = 1.0;
+    
+    OutVertexTable out;
+    out.position = transformMatrix * position4;
+    out.color = colors[vertexID];
+    
+    simd_float4x4 modelViewMatrix = viewMatrix * modelMatrix;
+    simd_float3x3 normalMatrix = matrix_float4x4_extract_linear_two(modelViewMatrix);
+    out.eye =  -(modelViewMatrix * position4).xyz;    
+    out.normal = normalMatrix * normals[vertexID];
+    out.material = material[vertexID];
+    out.hasTexture = verexHasTexture[vertexID];
+    out.uv = uv[vertexID].xy;
+    out.textnumber = int(uv[vertexID].z);
+    
+    return out;
+}
+
+constexpr sampler s(coord::normalized, address::clamp_to_edge, filter::linear);
+
+fragment float4 tableFragmentFunction(OutVertexTable vert [[stage_in]],                                            
+                                      texture2d<float> diffuseTexture0 [[texture(0)]],
+                                      texture2d<float> diffuseTexture1 [[texture(1)]],
+                                      texture2d<float> diffuseTexture2 [[texture(2)]]) {
+    
+
+    float4 pixelcolor;
+    if (vert.hasTexture) {
+        
+        if (vert.textnumber == 0) { 
+            pixelcolor = float4(diffuseTexture0.sample(s, vert.uv).rgba);
+        } else if (vert.textnumber == 1) {
+            pixelcolor = float4(diffuseTexture1.sample(s, vert.uv).rgba);
+        } else if (vert.textnumber == 2) {
+            pixelcolor = float4(diffuseTexture2.sample(s, vert.uv).rgba);            
+        } else { 
+            pixelcolor = float4(diffuseTexture0.sample(s, vert.uv).rgba);            
+        }
+        
+    } else { 
+        pixelcolor = vert.color; 
+    }
+    
+    if (pixelcolor.a == 0) {
+        pixelcolor = vert.color;
+    }
+    
+    float3 ambientTerm = light.ambientColor * material.ambientColor;
+    float3 normal = normalize(vert.normal);
+    float diffuseIntensity = saturate(dot(normal, light.direction));
+    
+    if (pixelcolor.g > 0.9) {
+        if (diffuseIntensity < 1) {
+            diffuseIntensity = 1;
+        }
+    }
+    
+    if (diffuseIntensity < 0.3 ) {
+        diffuseIntensity = 0.3;
+    }
+    
+    float3 diffuseTerm = light.diffuseColor * pixelcolor.rgb * diffuseIntensity;
+    
+    
+    float3 specularTerm(0);
+    if (diffuseIntensity > 0)
+    {
+        float3 eyeDirection = normalize(vert.eye);
+        float3 halfway = normalize(light.direction + eyeDirection);
+        float specularFactor = pow(saturate(dot(normal, halfway)), material.specularPower);
+        specularTerm = light.specularColor * material.specularColor * specularFactor;
+    }
+    
+    float4 shadedlight;
+    shadedlight = float4(ambientTerm + diffuseTerm + specularTerm, pixelcolor.a);
+    float ballancex = vert.material.x;
+    float ballancey = vert.material.y;
+    float4 shadedlightbalanced = shadedlight * ballancex;
+    float4 initialballance = pixelcolor * ballancey;
+    float4 resultcolor = shadedlightbalanced + initialballance;
+    
+    if (pixelcolor.g > 0.9) {
+        return shadedlight;
+    }
+    
+    resultcolor.a = pixelcolor.a;
+    return resultcolor;
+    
+    
+    // k
+    // [-----/--] = 1
+    // lifgting / solid
+}
+
+
+vertex OutVertexChip chipVertexFunction(uint vertexID [[vertex_id]], 
                                          constant float3 *vertices [[buffer(0)]],
                                          constant float3 *normals [[buffer(1)]],
                                          constant float4 *colors[[buffer(2)]],
@@ -87,7 +210,7 @@ vertex OutVertexThree chipVertexFunction(uint vertexID [[vertex_id]],
     position4.xyz = position3;
     position4.w = 1.0;
     
-    OutVertexThree out;
+    OutVertexChip out;
     out.position = transformMatrix * position4;
     out.color = colors[vertexID];
     
@@ -100,11 +223,14 @@ vertex OutVertexThree chipVertexFunction(uint vertexID [[vertex_id]],
     return out;
 }
 
-fragment float4 chipFragmentFunction(OutVertexThree vert [[stage_in]]) {
+fragment float4 chipFragmentFunction(OutVertexChip vert [[stage_in]]) {
     
 
     
     float4 pixelcolor = vert.color;    
+    
+    
+    
     float3 ambientTerm = light.ambientColor * material.ambientColor;
     float3 normal = normalize(vert.normal);
     float diffuseIntensity = saturate(dot(normal, light.direction));
@@ -300,4 +426,50 @@ vertex OutVertexDote doteVertex(uint vertexID [[vertex_id]],
 
 fragment float4 doteFragment(OutVertexDote vert [[stage_in]]) {
     return vert.color;
+}
+
+
+struct OutVertexSpaceBox
+{
+    float4 position [[position]];
+    float2 uv;
+    int textnumber;
+};
+
+vertex OutVertexSpaceBox spaceboxVertex(uint vertexID [[vertex_id]],
+                                        constant float3 *vertices [[buffer(0)]],
+                                        constant float3 *uv[[buffer(1)]],
+                                        constant simd_float4x4 *matricies[[buffer(2)]] )
+{
+    
+    simd_float4x4 projectionMatrix = matricies[0];
+    simd_float4x4 viewMatrix = matricies[1];
+    simd_float4x4 modelMatrix = matricies[2];
+    simd_float4x4 transformMatrix = projectionMatrix * viewMatrix * modelMatrix;
+    
+    float3 position3 = vertices[vertexID];
+    float4 position4;
+    position4.xyz = position3;
+    position4.w = 1.0;
+    
+    OutVertexSpaceBox out;
+    out.position = transformMatrix * position4;
+    out.uv = uv[vertexID].xy;
+    out.textnumber = int(uv[vertexID].z);
+    
+    
+    return out;
+}
+
+fragment float4 spaceboxFragment(OutVertexSpaceBox vert [[stage_in]],
+                                 texture2d<float> diffuseTexture0 [[texture(0)]],
+                                 texture2d<float> diffuseTexture1 [[texture(1)]]) {
+    
+    
+    float4 pixelcolor;
+    if (vert.textnumber == 0) { pixelcolor = float4(diffuseTexture0.sample(s, vert.uv).rgba); } 
+    else if (vert.textnumber == 1) { pixelcolor = float4(diffuseTexture1.sample(s, vert.uv).rgba);}
+    else { pixelcolor = float4(diffuseTexture0.sample(s, vert.uv).rgba); }
+    return pixelcolor;
+    
 }
