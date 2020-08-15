@@ -150,7 +150,7 @@ fragment float4 tableFragmentFunction(OutVertexTable vert [[stage_in]],
     float3 normal = normalize(vert.normal);
     float diffuseIntensity = saturate(dot(normal, light.direction));
     
-    if (pixelcolor.g > 0.9) {
+    if (pixelcolor.g > 0.94) {
         if (diffuseIntensity < 1) {
             diffuseIntensity = 1;
         }
@@ -180,7 +180,7 @@ fragment float4 tableFragmentFunction(OutVertexTable vert [[stage_in]],
     float4 initialballance = pixelcolor * ballancey;
     float4 resultcolor = shadedlightbalanced + initialballance;
     
-    if (pixelcolor.g > 0.9) {
+    if (pixelcolor.g > 0.94) {
         return shadedlight;
     }
     
