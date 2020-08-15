@@ -159,7 +159,7 @@ fragment float4 tableFragmentFunction(OutVertexTable vert [[stage_in]],
     if (diffuseIntensity < 0.3 ) {
         diffuseIntensity = 0.3;
     }
-    
+ 
     float3 diffuseTerm = light.diffuseColor * pixelcolor.rgb * diffuseIntensity;
     
     
@@ -169,7 +169,7 @@ fragment float4 tableFragmentFunction(OutVertexTable vert [[stage_in]],
         float3 eyeDirection = normalize(vert.eye);
         float3 halfway = normalize(light.direction + eyeDirection);
         float specularFactor = pow(saturate(dot(normal, halfway)), material.specularPower);
-        specularTerm = light.specularColor * material.specularColor * specularFactor;
+        specularTerm = light.specularColor * material.specularColor * specularFactor * vert.material.z;
     }
     
     float4 shadedlight;
@@ -242,7 +242,7 @@ fragment float4 chipFragmentFunction(OutVertexChip vert [[stage_in]]) {
         float3 eyeDirection = normalize(vert.eye);
         float3 halfway = normalize(light.direction + eyeDirection);
         float specularFactor = pow(saturate(dot(normal, halfway)), material.specularPower);
-        specularTerm = light.specularColor * material.specularColor * specularFactor;
+        specularTerm = light.specularColor * material.specularColor * specularFactor * vert.material.z;
     }
     
     float4 shadedlight;
