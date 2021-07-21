@@ -101,7 +101,7 @@ kernel void copyTextures(texture2d<float, access::write> drawable [[ texture(0) 
     float4 color = input.read(pt);
     float4 oldcolor = colors.read(pt);
     
-    float k = d / 100;
+    float k = d / 50;
 
     if (k > 1) { k = 1; }
     if (k < 0) { k = 0; }
@@ -109,4 +109,5 @@ kernel void copyTextures(texture2d<float, access::write> drawable [[ texture(0) 
     float4 result = color * k + oldcolor * (1 - k);
     
     drawable.write(result, pt);
+
 }
