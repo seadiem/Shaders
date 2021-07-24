@@ -25,15 +25,18 @@ kernel void moveCells(device FluidBuffer *current [[buffer(0)]],
 kernel void moveCellsPrecise(device FluidBuffer *current [[buffer(0)]],
                              device FluidBuffer *next [[buffer(1)]],
                              uint2 id [[thread_position_in_grid]]) {
-    float2 p = float2(id.y, id.x);
-    float2 v = current[0].cells[id.y][id.x].velocity;
+    uint2 tempid = id;
+    id.x = tempid.y;
+    id.y = tempid.x;
+    float2 p = float2(id);
+    float2 v = current[0].cells[id.x][id.y].velocity;
     float2 f = p - v;
     int2 i = int2(floor(f));
     float2 j = fract(f);
-    float d1 = current[0].cells[i.y][i.x].density;
-    float d2 = current[0].cells[i.y + 1][i.x].density;
-    float d3 = current[0].cells[i.y][i.x + 1].density;
-    float d4 = current[0].cells[i.y + 1][i.x + 1].density;
+    float d1 = current[0].cells[i.x][i.y].density;
+    float d2 = current[0].cells[i.x][i.y + 1].density;
+    float d3 = current[0].cells[i.x + 1][i.y].density;
+    float d4 = current[0].cells[i.x + 1][i.y + 1].density;
     float z1 = mix(d1, d2, j.x);
     float z2 = mix(d3, d4, j.x);
     float nd = mix(z1, z2, j.y);
