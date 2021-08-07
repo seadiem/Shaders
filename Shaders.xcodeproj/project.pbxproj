@@ -11,6 +11,7 @@
 		302EA7C426A001CC00D7DC16 /* Move.metal in Sources */ = {isa = PBXBuildFile; fileRef = 302EA7C326A001CC00D7DC16 /* Move.metal */; };
 		303127CF268316C3008474FE /* Grid1.metal in Sources */ = {isa = PBXBuildFile; fileRef = 303127CE268316C3008474FE /* Grid1.metal */; };
 		30702263269ECC2000ACEA52 /* Fluids.metal in Sources */ = {isa = PBXBuildFile; fileRef = 30702262269ECC2000ACEA52 /* Fluids.metal */; };
+		3087792826AC00EC008330CD /* Debug.metal in Sources */ = {isa = PBXBuildFile; fileRef = 3087792726AC00EC008330CD /* Debug.metal */; };
 		30A649D624B4A3EA00DCAAFD /* Shadows.metal in Sources */ = {isa = PBXBuildFile; fileRef = 30A649D524B4A3EA00DCAAFD /* Shadows.metal */; };
 		30BAE27524B732D600E81C33 /* Airhockey.metal in Sources */ = {isa = PBXBuildFile; fileRef = 30BAE27424B732D600E81C33 /* Airhockey.metal */; };
 		30C6C5BC23AA58C500A1197E /* SimpleMapVertex.metal in Sources */ = {isa = PBXBuildFile; fileRef = 30C6C5BB23AA58C500A1197E /* SimpleMapVertex.metal */; };
@@ -25,6 +26,7 @@
 		302EA7C326A001CC00D7DC16 /* Move.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Move.metal; sourceTree = "<group>"; };
 		303127CE268316C3008474FE /* Grid1.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Grid1.metal; sourceTree = "<group>"; };
 		30702262269ECC2000ACEA52 /* Fluids.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Fluids.metal; sourceTree = "<group>"; };
+		3087792726AC00EC008330CD /* Debug.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Debug.metal; sourceTree = "<group>"; };
 		30A649D524B4A3EA00DCAAFD /* Shadows.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Shadows.metal; sourceTree = "<group>"; };
 		30BAE27424B732D600E81C33 /* Airhockey.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Airhockey.metal; sourceTree = "<group>"; };
 		30C6C5BB23AA58C500A1197E /* SimpleMapVertex.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = SimpleMapVertex.metal; sourceTree = "<group>"; };
@@ -45,6 +47,7 @@
 		30E54CFF23A2627C00BDE3BD /* Shaders */ = {
 			isa = PBXGroup;
 			children = (
+				3087792726AC00EC008330CD /* Debug.metal */,
 				30C8582226A8035B00073F21 /* Advection.metal */,
 				302EA7C326A001CC00D7DC16 /* Move.metal */,
 				30702262269ECC2000ACEA52 /* Fluids.metal */,
@@ -120,6 +123,7 @@
 				303127CF268316C3008474FE /* Grid1.metal in Sources */,
 				30E54D0123A2627C00BDE3BD /* Shaders.metal in Sources */,
 				30702263269ECC2000ACEA52 /* Fluids.metal in Sources */,
+				3087792826AC00EC008330CD /* Debug.metal in Sources */,
 				30F6B68F26079B10000A0B41 /* Simple.metal in Sources */,
 				30A649D624B4A3EA00DCAAFD /* Shadows.metal in Sources */,
 				30BAE27524B732D600E81C33 /* Airhockey.metal in Sources */,
