@@ -16,6 +16,7 @@
 		30BAE27524B732D600E81C33 /* Airhockey.metal in Sources */ = {isa = PBXBuildFile; fileRef = 30BAE27424B732D600E81C33 /* Airhockey.metal */; };
 		30C6C5BC23AA58C500A1197E /* SimpleMapVertex.metal in Sources */ = {isa = PBXBuildFile; fileRef = 30C6C5BB23AA58C500A1197E /* SimpleMapVertex.metal */; };
 		30C8582326A8035B00073F21 /* Advection.metal in Sources */ = {isa = PBXBuildFile; fileRef = 30C8582226A8035B00073F21 /* Advection.metal */; };
+		30CC0D3026C104A200B78AD2 /* Snake.metal in Sources */ = {isa = PBXBuildFile; fileRef = 30CC0D2F26C104A200B78AD2 /* Snake.metal */; };
 		30E54D0123A2627C00BDE3BD /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 30E54D0023A2627C00BDE3BD /* Shaders.metal */; };
 		30E54D0823A262A600BDE3BD /* Kernel.metal in Sources */ = {isa = PBXBuildFile; fileRef = 30E54D0723A262A600BDE3BD /* Kernel.metal */; };
 		30F6B68F26079B10000A0B41 /* Simple.metal in Sources */ = {isa = PBXBuildFile; fileRef = 30F6B68E26079B10000A0B41 /* Simple.metal */; };
@@ -31,6 +32,7 @@
 		30BAE27424B732D600E81C33 /* Airhockey.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Airhockey.metal; sourceTree = "<group>"; };
 		30C6C5BB23AA58C500A1197E /* SimpleMapVertex.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = SimpleMapVertex.metal; sourceTree = "<group>"; };
 		30C8582226A8035B00073F21 /* Advection.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Advection.metal; sourceTree = "<group>"; };
+		30CC0D2F26C104A200B78AD2 /* Snake.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Snake.metal; sourceTree = "<group>"; };
 		30E54D0023A2627C00BDE3BD /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		30E54D0723A262A600BDE3BD /* Kernel.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Kernel.metal; sourceTree = "<group>"; };
 		30F6B68E26079B10000A0B41 /* Simple.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Simple.metal; sourceTree = "<group>"; };
@@ -47,6 +49,7 @@
 		30E54CFF23A2627C00BDE3BD /* Shaders */ = {
 			isa = PBXGroup;
 			children = (
+				30CC0D2F26C104A200B78AD2 /* Snake.metal */,
 				3087792726AC00EC008330CD /* Debug.metal */,
 				30C8582226A8035B00073F21 /* Advection.metal */,
 				302EA7C326A001CC00D7DC16 /* Move.metal */,
@@ -117,6 +120,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				302EA7C426A001CC00D7DC16 /* Move.metal in Sources */,
+				30CC0D3026C104A200B78AD2 /* Snake.metal in Sources */,
 				30E54D0823A262A600BDE3BD /* Kernel.metal in Sources */,
 				3012950323EC03FC00C552A6 /* Lighting.metal in Sources */,
 				30C6C5BC23AA58C500A1197E /* SimpleMapVertex.metal in Sources */,
