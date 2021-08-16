@@ -71,9 +71,68 @@ kernel void unitAdvectVelocitySnake(constant SnakeBuffer *black [[buffer(0)]],
         elements[i] = element;
     }
     for (int i = 0; i < STENCIL; i++) {
+        SnakeCell current = black[0].cells[id.x][id.y];
         AdvectElement element = elements[i];
+        
+        // поле
+        if (length(current.velocity) == 0 &&
+            current.density == 0) {}
+        
+        // хвост
+        if (length(current.directionToParrent) > 0 &&
+            length(current.directionToNode) == 0 && 
+            current.density > 0) {}
+        
+        // середина
+        if (length(current.directionToParrent) > 0 &&
+            length(current.directionToNode) > 0 &&
+            current.density > 0) {}
+        
+        // голова
+        if (length(current.velocity) > 0 &&
+            length(current.directionToNode) > 0 &&
+            length(current.directionToParrent) == 0 &&
+            current.density > 0) {}
+        
         if (length(element.offset + element.correspCell.velocity) == 0) {
             white[0].cells[id.x][id.y] = element.correspCell;
+        }
+    }
+}
+
+kernel void swapSnake(device SnakeBuffer *source [[buffer(0)]],
+                      device SnakeBuffer *target [[buffer(1)]],
+                      uint2 id [[thread_position_in_grid]]) {
+    
+    SnakeCell current = source[0].cells[id.x][id.y];
+    if (current.target == false) { return; } // дальше выполняется лишь один тред из всей сетки
+    
+    thread AdvectElement elements[STENCIL];
+    for (int i = 0; i < STENCIL; i++) {
+        uint2 wid = stencilCell(id, i);
+        AdvectElement element;
+        element.letter = i;
+        element.offset = stencilOffsets[i].offset; 
+        element.correspCell = source[0].cells[wid.x][wid.y];
+        elements[i] = element;
+    }
+    
+    for (int i = 0; i < STENCIL; i++) {
+        AdvectElement element = elements[i];
+        
+        if (length(element.correspCell.velocity) > 0) {
+            float2 eid = element.offset + float2(id);
+            float2 teid = eid + element.correspCell.velocity; uint2 itied = uint2(teid);
+            if (length(teid - float2(id)) == 0) {
+                target[0].cells[id.x][id.y] = element.correspCell; // теперь это голова
+                // теперь настраиваем ячейку откуда пришла голова
+                SnakeCell tcurrent = current;
+                tcurrent.velocity = 0;
+                tcurrent.directionToNode = 0;
+                tcurrent.directionToParrent = current.velocity;
+                target[0].cells[itied.x][itied.y] = tcurrent;
+                return;
+            }
         }
     }
 }
@@ -94,12 +153,6 @@ kernel void setHeadVelocity(device SnakeBuffer *current [[buffer(0)]],
     if (length(current[0].cells[id.x][id.y].velocity) > 0) {
         current[0].cells[id.x][id.y].velocity = velocity[0];
     }
-}
-
-kernel void swapSnake(device SnakeBuffer *source [[buffer(0)]],
-                      device SnakeBuffer *target [[buffer(1)]],
-                      uint2 id [[thread_position_in_grid]]) {
-    target[0].cells[id.x][id.y] = source[0].cells[id.x][id.y];
 }
 
 kernel void fillSnakeTextureToDark(texture2d<half, access::write> output [[texture(0)]],
