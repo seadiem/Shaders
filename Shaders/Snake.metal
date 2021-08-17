@@ -1,8 +1,8 @@
 #include <metal_stdlib>
 using namespace metal;
 
-#define SNAKECOLUMNS 8
-#define SNAKEROWS 8
+#define SNAKECOLUMNS 9
+#define SNAKEROWS 9
 #define SNAKESCALE 6
 
 float2 mapWid(float2 w) {
@@ -21,7 +21,7 @@ struct SnakeCell {
     float2 velocity;
     float2 info;
     float density;
-    char cell; // 0 field, 1 body, 2 target.
+    char cell; // 0 field, 1 body, 2 head, 3 target
     bool velocityAllow;
 };
 
@@ -90,6 +90,15 @@ kernel void unitAdvectVelocitySnake(constant SnakeBuffer *black [[buffer(0)]],
     debug1[0].cells[id.x][id.y] = white[0].cells[id.x][id.y];
 }
 
+kernel void setHeadVelocity(device SnakeBuffer *current [[buffer(0)]],
+                            constant float2 *velocity [[buffer(1)]],
+                            uint2 id [[thread_position_in_grid]]) {
+    if (current[0].cells[id.x][id.y].cell == 2) {
+        current[0].cells[id.x][id.y].velocity = velocity[0];
+        current[0].cells[id.x][id.y].velocityAllow = false;        
+    }
+}
+
 kernel void diffSnake(constant SnakeBuffer *black [[buffer(0)]],
                       device SnakeBuffer *white [[buffer(1)]],
                       constant float4 *info [[buffer(2)]],
@@ -100,6 +109,43 @@ kernel void diffSnake(constant SnakeBuffer *black [[buffer(0)]],
     debug2[0].cells[id.x][id.y] = black[0].cells[id.x][id.y];
 //    white[0].cells[id.x][id.y].density -= black[0].cells[id.x][id.y].density;
     //   white[0].cells[id.x][id.y].velocity -= black[0].cells[id.x][id.y].velocity;
+}
+
+kernel void copySnake(constant SnakeBuffer *source [[buffer(0)]],
+                      device SnakeBuffer *target [[buffer(1)]],
+                      uint2 id [[thread_position_in_grid]]) {
+    target[0].cells[id.x][id.y] = source[0].cells[id.x][id.y];
+}
+
+kernel void captureSnake(constant SnakeBuffer *source [[buffer(0)]],
+                         device SnakeBuffer *target [[buffer(1)]],
+                         uint2 id [[thread_position_in_grid]]) {
+    
+    SnakeCell current = source[0].cells[id.x][id.y];
+    if (current.cell != 3) { return; } // дальше выполняется лишь один тред из всей сетки
+    
+    thread AdvectElement elements[STENCIL];
+    for (int i = 0; i < STENCIL; i++) {
+        uint2 wid = stencilCell(id, i);
+        AdvectElement element;
+        element.letter = i;
+        element.offset = stencilOffsets[i].offset; 
+        element.correspCell = source[0].cells[wid.x][wid.y];
+        elements[i] = element;
+    }
+    float2 c = float2(id);
+    for (int i = 0; i < STENCIL; i++) {
+        AdvectElement element = elements[i];
+        if (element.correspCell.cell == 2) {
+            float2 n = c + element.offset + element.correspCell.velocity;
+            if (length(c - n) == 0) {
+                target[0].cells[id.x][id.y] = element.correspCell;
+                uint2 zid = uint2(c + element.offset);
+                target[0].cells[zid.x][zid.y].cell = 1;
+                return;
+            }
+        }
+    }
 }
 
 kernel void swapSnake(device SnakeBuffer *source [[buffer(0)]],
@@ -122,15 +168,6 @@ kernel void swapSnake(device SnakeBuffer *source [[buffer(0)]],
 //    for (int i = 0; i < STENCIL; i++) {
 //        AdvectElement element = elements[i];
 //    }
-}
-
-kernel void setHeadVelocity(device SnakeBuffer *current [[buffer(0)]],
-                            constant float2 *velocity [[buffer(1)]],
-                            uint2 id [[thread_position_in_grid]]) {
-    if (current[0].cells[id.x][id.y].density > 0) {
-        current[0].cells[id.x][id.y].velocity = velocity[0];
-        current[0].cells[id.x][id.y].velocityAllow = false;        
-    }
 }
 
 kernel void fillSnakeTextureToDark(texture2d<half, access::write> output [[texture(0)]],
