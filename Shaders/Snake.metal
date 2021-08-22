@@ -22,7 +22,7 @@ struct SnakeCell {
     float2 info;
     float density;
     char cell; // 0 field, 1 body, 2 head, 3 target
-    bool velocityAllow;
+    char velocityAllow;
 };
 
 struct SnakeBuffer {
@@ -99,18 +99,6 @@ kernel void setHeadVelocity(device SnakeBuffer *current [[buffer(0)]],
     }
 }
 
-kernel void diffSnake(constant SnakeBuffer *black [[buffer(0)]],
-                      device SnakeBuffer *white [[buffer(1)]],
-                      constant float4 *info [[buffer(2)]],
-                      device SnakeBuffer *debug1 [[buffer(3)]],
-                      device SnakeBuffer *debug2 [[buffer(4)]],
-                      uint2 id [[thread_position_in_grid]]) {
-    debug1[0].cells[id.x][id.y] = white[0].cells[id.x][id.y];
-    debug2[0].cells[id.x][id.y] = black[0].cells[id.x][id.y];
-//    white[0].cells[id.x][id.y].density -= black[0].cells[id.x][id.y].density;
-    //   white[0].cells[id.x][id.y].velocity -= black[0].cells[id.x][id.y].velocity;
-}
-
 kernel void copySnake(constant SnakeBuffer *source [[buffer(0)]],
                       device SnakeBuffer *target [[buffer(1)]],
                       uint2 id [[thread_position_in_grid]]) {
@@ -148,27 +136,6 @@ kernel void captureSnake(constant SnakeBuffer *source [[buffer(0)]],
     }
 }
 
-kernel void swapSnake(device SnakeBuffer *source [[buffer(0)]],
-                      device SnakeBuffer *target [[buffer(1)]],
-                      uint2 id [[thread_position_in_grid]]) {
-    
-//    SnakeCell current = source[0].cells[id.x][id.y];
-//    if (current.cell == 2) { return; } // дальше выполняется лишь один тред из всей сетки
-//    
-//    thread AdvectElement elements[STENCIL];
-//    for (int i = 0; i < STENCIL; i++) {
-//        uint2 wid = stencilCell(id, i);
-//        AdvectElement element;
-//        element.letter = i;
-//        element.offset = stencilOffsets[i].offset; 
-//        element.correspCell = source[0].cells[wid.x][wid.y];
-//        elements[i] = element;
-//    }
-//    
-//    for (int i = 0; i < STENCIL; i++) {
-//        AdvectElement element = elements[i];
-//    }
-}
 
 kernel void fillSnakeTextureToDark(texture2d<half, access::write> output [[texture(0)]],
                                    uint2 id [[thread_position_in_grid]]) {
