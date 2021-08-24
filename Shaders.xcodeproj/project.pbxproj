@@ -10,6 +10,7 @@
 		3012950323EC03FC00C552A6 /* Lighting.metal in Sources */ = {isa = PBXBuildFile; fileRef = 3012950223EC03FC00C552A6 /* Lighting.metal */; };
 		302EA7C426A001CC00D7DC16 /* Move.metal in Sources */ = {isa = PBXBuildFile; fileRef = 302EA7C326A001CC00D7DC16 /* Move.metal */; };
 		303127CF268316C3008474FE /* Grid1.metal in Sources */ = {isa = PBXBuildFile; fileRef = 303127CE268316C3008474FE /* Grid1.metal */; };
+		3053F04D26D38B3F0051FF20 /* SnakeRenderRazeware.metal in Sources */ = {isa = PBXBuildFile; fileRef = 3053F04C26D38B3F0051FF20 /* SnakeRenderRazeware.metal */; };
 		306D7F3826CFF9F100031F48 /* SnakeRender.metal in Sources */ = {isa = PBXBuildFile; fileRef = 306D7F3726CFF9F100031F48 /* SnakeRender.metal */; };
 		30702263269ECC2000ACEA52 /* Fluids.metal in Sources */ = {isa = PBXBuildFile; fileRef = 30702262269ECC2000ACEA52 /* Fluids.metal */; };
 		3087792826AC00EC008330CD /* Debug.metal in Sources */ = {isa = PBXBuildFile; fileRef = 3087792726AC00EC008330CD /* Debug.metal */; };
@@ -27,6 +28,7 @@
 		3012950223EC03FC00C552A6 /* Lighting.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Lighting.metal; sourceTree = "<group>"; };
 		302EA7C326A001CC00D7DC16 /* Move.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Move.metal; sourceTree = "<group>"; };
 		303127CE268316C3008474FE /* Grid1.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Grid1.metal; sourceTree = "<group>"; };
+		3053F04C26D38B3F0051FF20 /* SnakeRenderRazeware.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = SnakeRenderRazeware.metal; sourceTree = "<group>"; };
 		306D7F3726CFF9F100031F48 /* SnakeRender.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = SnakeRender.metal; sourceTree = "<group>"; };
 		30702262269ECC2000ACEA52 /* Fluids.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Fluids.metal; sourceTree = "<group>"; };
 		3087792726AC00EC008330CD /* Debug.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Debug.metal; sourceTree = "<group>"; };
@@ -51,6 +53,7 @@
 		30E54CFF23A2627C00BDE3BD /* Shaders */ = {
 			isa = PBXGroup;
 			children = (
+				3053F04C26D38B3F0051FF20 /* SnakeRenderRazeware.metal */,
 				306D7F3726CFF9F100031F48 /* SnakeRender.metal */,
 				30CC0D2F26C104A200B78AD2 /* Snake.metal */,
 				3087792726AC00EC008330CD /* Debug.metal */,
@@ -132,6 +135,7 @@
 				30E54D0123A2627C00BDE3BD /* Shaders.metal in Sources */,
 				30702263269ECC2000ACEA52 /* Fluids.metal in Sources */,
 				3087792826AC00EC008330CD /* Debug.metal in Sources */,
+				3053F04D26D38B3F0051FF20 /* SnakeRenderRazeware.metal in Sources */,
 				30F6B68F26079B10000A0B41 /* Simple.metal in Sources */,
 				30A649D624B4A3EA00DCAAFD /* Shadows.metal in Sources */,
 				30BAE27524B732D600E81C33 /* Airhockey.metal in Sources */,
