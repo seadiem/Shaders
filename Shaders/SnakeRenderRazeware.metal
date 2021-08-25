@@ -20,6 +20,10 @@ struct RazewareUniforms {
     simd_float3x3 normalMatrix;
 };
 
+struct CoubeTransform {
+    simd_float4x4 modelMatrix;
+};
+
 struct FragmentUniforms {
     char lightCount;
     simd_float3 cameraPosition;
@@ -42,6 +46,17 @@ constant LightRazeware razelight = {
     .specularColor = { 1, 1, 1 }
 };
     
+
+vertex VertexOutRazeware vertexMainRazewareInstancing(const VertexInRazeware vertexIn [[stage_in]],
+                                                      constant RazewareUniforms *uniforms [[buffer(1)]],
+                                                      constant CoubeTransform *transforms [[buffer(2)]],
+                                                      uint instanceID [[instance_id]]) {
+    VertexOutRazeware out {
+        .position = uniforms[0].projectionMatrix * uniforms[0].viewMatrix * uniforms[0].modelMatrix * transforms[instanceID].modelMatrix * vertexIn.position,
+        .worldPosition = (uniforms[0].modelMatrix * transforms[instanceID].modelMatrix * vertexIn.position).xyz,
+        .worldNormal = uniforms[0].normalMatrix * vertexIn.normal };
+    return out;
+}
 
 vertex VertexOutRazeware vertexMainRazeware(const VertexInRazeware vertexIn [[stage_in]],
                                             constant RazewareUniforms *uniforms [[buffer(1)]],
