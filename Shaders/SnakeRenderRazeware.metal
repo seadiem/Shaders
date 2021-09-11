@@ -11,6 +11,7 @@ struct VertexOutRazeware {
     float4 position [[position]];
     float3 worldPosition;
     float3 worldNormal;
+    float density;
 };
 
 struct RazewareUniforms {
@@ -20,8 +21,16 @@ struct RazewareUniforms {
     simd_float3x3 normalMatrix;
 };
 
+struct SnakeFridgeUniforms {
+    simd_float3x3 fridgeNormalMatrix;
+    simd_float4x4 fridgeModelMatrix;
+    simd_float4x4 cameraModelMatrix;
+    simd_float4x4 cameraProjectionMatrix;
+};
+
 struct CoubeTransform {
     simd_float4x4 modelMatrix;
+    simd_float3x3 normalMatrix;
 };
 
 struct FragmentUniforms {
@@ -47,14 +56,38 @@ constant LightRazeware razelight = {
 };
     
 
+struct SnakeRazewareCell {
+    float2 position;
+    float2 velocity;
+    float2 info;
+    float density;
+    char cell; // 0 field, 1 body, 2 head, 3 target
+    char velocityAllow;
+};
+
+#define SNAKECOLUMNSRAZE 9
+#define SNAKEROWSRAZE 9
+#define SNAKESCALERAZE 6
+
 vertex VertexOutRazeware vertexMainRazewareInstancing(const VertexInRazeware vertexIn [[stage_in]],
-                                                      constant RazewareUniforms *uniforms [[buffer(1)]],
+                                                      constant SnakeFridgeUniforms *uniforms [[buffer(1)]],
                                                       constant CoubeTransform *transforms [[buffer(2)]],
+                                                      constant SnakeRazewareCell *white [[buffer(3)]],
                                                       uint instanceID [[instance_id]]) {
+    SnakeRazewareCell cell = white[instanceID];
+    float4x4 modelCellMatrix = float4x4(1);
+    modelCellMatrix[3][0] = (cell.position.x - SNAKECOLUMNSRAZE / 2) * 5;
+    modelCellMatrix[3][1] = (cell.position.y - SNAKEROWSRAZE / 2) * 5;
     VertexOutRazeware out {
-        .position = uniforms[0].projectionMatrix * uniforms[0].viewMatrix * uniforms[0].modelMatrix * transforms[instanceID].modelMatrix * vertexIn.position,
-        .worldPosition = (uniforms[0].modelMatrix * transforms[instanceID].modelMatrix * vertexIn.position).xyz,
-        .worldNormal = uniforms[0].normalMatrix * vertexIn.normal };
+        .position = uniforms[0].cameraProjectionMatrix * 
+                    uniforms[0].cameraModelMatrix * 
+                    uniforms[0].fridgeModelMatrix * 
+                    modelCellMatrix *
+                    vertexIn.position,
+        .worldPosition = (uniforms[0].fridgeModelMatrix * modelCellMatrix * vertexIn.position).xyz,
+        .worldNormal = uniforms[0].fridgeNormalMatrix * vertexIn.normal,
+        .density = cell.density
+    };
     return out;
 }
 
@@ -81,6 +114,7 @@ fragment float4 fragmentMainRazeware(VertexOutRazeware in [[stage_in]],
     float3 normalDirection = normalize(in.worldNormal);
     
     float3 baseColor = float3(0.4, 0.5, 0.6);
+    baseColor *= in.density;
     float3 diffuseColor = float3(0, 0, 0);
     float3 ambientColor = float3(0.4, 0.1, 0.1);
     float3 specularColor = float3(0, 0, 0);
