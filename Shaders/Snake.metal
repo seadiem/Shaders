@@ -22,9 +22,8 @@ struct SnakeCell3D {
     float3 velocity;
     float3 info;
     float density;
-    char cell; // 0 field, 1 body, 2 head, 3 tail, 4 target
+    char cell; // 0 field, 4 target
     uint rem;
-    char velocityAllow;
 };
 
 struct SnakeBuffer3D {
@@ -65,18 +64,6 @@ void fillStencill(thread AdvectElement3D *elements, constant float3 *offsets, ui
     }
 }
 
-SnakeCell3D fieldCell() {
-    SnakeCell3D cell = {
-        .position = 0,
-        .velocity = 0,
-        .info = 0,
-        .density = 0,
-        .cell = 0,
-        .velocityAllow = 0
-    };
-    return cell;
-}
-
 kernel void unitAdvectVelocitySnake3DE(constant SnakeGrids *black [[buffer(0)]],
                                        device SnakeGrids *white [[buffer(1)]],
                                        constant Stencil3x3 *stencils [[buffer(2)]],
@@ -99,9 +86,7 @@ kernel void unitAdvectVelocitySnake3DE(constant SnakeGrids *black [[buffer(0)]],
 kernel void contentAdvectSnake3DE(constant SnakeGrids *black [[buffer(0)]],
                                   device SnakeGrids *white [[buffer(1)]],
                                   constant Stencil3x3 *stencils [[buffer(2)]],
-                                  uint3 id [[thread_position_in_grid]]) {
-//    SnakeCell3D current = black[0].grids[id.z].cells[id.x][id.y];
-    
+                                  uint3 id [[thread_position_in_grid]]) {    
     
     white[0].grids[id.z].cells[id.x][id.y] = black[0].grids[id.z].cells[id.x][id.y];
     thread AdvectElement3D elements[STENCIL3D];
@@ -195,10 +180,6 @@ kernel void fillSnakeTexture(constant SnakeGrids *current [[buffer(0)]],
     float3 fcolor = 0;
     fcolor.xyz = cell.velocity * 0.1;
     color += fcolor;
-    
-    if (cell.velocityAllow == false) {
-        color = float3(1, 0, 0);
-    }
     
     
 //    if (cell.cell == 0) {
