@@ -22,7 +22,7 @@ struct SnakeCell3D {
     float3 velocity;
     float3 info;
     float density;
-    char cell; // 0 field, 1 body, 2 head, 3 tail
+    char cell; // 0 field, 1 body, 2 head, 3 tail, 4 target
     uint rem;
     char velocityAllow;
 };
@@ -77,6 +77,25 @@ SnakeCell3D fieldCell() {
     return cell;
 }
 
+kernel void unitAdvectVelocitySnake3DE(constant SnakeGrids *black [[buffer(0)]],
+                                       device SnakeGrids *white [[buffer(1)]],
+                                       constant Stencil3x3 *stencils [[buffer(2)]],
+                                       uint3 id [[thread_position_in_grid]]) {
+    SnakeCell3D current = black[0].grids[id.z].cells[id.x][id.y];
+    thread AdvectElement3D elements[STENCIL3D];
+    fillStencill(elements, stencils[0].offsets, id, black[0].grids);
+    for (int i = 0; i < STENCIL3D; i++) {
+        AdvectElement3D element = elements[i];
+        float3 result = element.offset + element.correspCell.velocity;
+        if (length(result) == 0) {
+            if ((current.rem <= 2 ) && (element.correspCell.rem == 22)) {
+                white[0].grids[id.z].cells[id.x][id.y] = element.correspCell;
+                white[0].grids[id.z].cells[id.x][id.y].rem += 10;
+            } 
+        }
+    }
+}
+
 kernel void contentAdvectSnake3DE(constant SnakeGrids *black [[buffer(0)]],
                                   device SnakeGrids *white [[buffer(1)]],
                                   constant Stencil3x3 *stencils [[buffer(2)]],
@@ -97,25 +116,6 @@ kernel void contentAdvectSnake3DE(constant SnakeGrids *black [[buffer(0)]],
     
 }
 
-kernel void unitAdvectVelocitySnake3DE(constant SnakeGrids *black [[buffer(0)]],
-                                       device SnakeGrids *white [[buffer(1)]],
-                                       constant Stencil3x3 *stencils [[buffer(2)]],
-                                       uint3 id [[thread_position_in_grid]]) {
-    SnakeCell3D current = black[0].grids[id.z].cells[id.x][id.y];
-    thread AdvectElement3D elements[STENCIL3D];
-    fillStencill(elements, stencils[0].offsets, id, black[0].grids);
-    for (int i = 0; i < STENCIL3D; i++) {
-        AdvectElement3D element = elements[i];
-        float3 result = element.offset + element.correspCell.velocity;
-        if (length(result) == 0) {
-            if ((current.rem <= 2 ) && (element.correspCell.rem == 22)) {
-                white[0].grids[id.z].cells[id.x][id.y] = element.correspCell;
-                white[0].grids[id.z].cells[id.x][id.y].rem += 10;
-            } 
-        }
-    }
-}
-
 kernel void setHeadVelocityE(device SnakeGrids *current [[buffer(0)]],
                              constant float3 *velocity [[buffer(1)]],
                              constant uint *last [[buffer(2)]],
@@ -125,44 +125,17 @@ kernel void setHeadVelocityE(device SnakeGrids *current [[buffer(0)]],
     }
 }
 
-kernel void unitAdvectVelocitySnake3D(constant SnakeGrids *black [[buffer(0)]],
-                                      device SnakeGrids *white [[buffer(1)]],
-                                      constant Stencil3x3 *stencils [[buffer(2)]],
-                                      uint3 id [[thread_position_in_grid]]) {        
-    thread AdvectElement3D elements[STENCIL3D];
-    fillStencill(elements, stencils[0].offsets, id, black[0].grids);
-    for (int i = 0; i < STENCIL3D; i++) {
-        AdvectElement3D element = elements[i];
-        float3 result = element.offset + element.correspCell.velocity;
-        if (length(result) == 0) {
-            white[0].grids[id.z].cells[id.x][id.y].cell = element.correspCell.cell;
-            white[0].grids[id.z].cells[id.x][id.y].density = element.correspCell.density;
-            if (black[0].grids[id.z].cells[id.x][id.y].velocityAllow) {
-                white[0].grids[id.z].cells[id.x][id.y].velocity = element.correspCell.velocity;
-            }
-            break; // можно сделать накопление результата
-        }  
-    }
-}
-
-kernel void cleanFieldSnake3D(constant SnakeGrids *black [[buffer(0)]],
-                              device SnakeGrids *white [[buffer(1)]],
+kernel void cleanFieldSnake3D(constant SnakeGrids *source [[buffer(0)]],
+                              device SnakeGrids *result [[buffer(1)]],
                               uint3 id [[thread_position_in_grid]]) {
-    white[0].grids[id.z].cells[id.x][id.y].density -= black[0].grids[id.z].cells[id.x][id.y].density;
-    if (white[0].grids[id.z].cells[id.x][id.y].rem > 2) {
-        white[0].grids[id.z].cells[id.x][id.y].rem -= 10;        
+    if (result[0].grids[id.z].cells[id.x][id.y].cell != 4) {
+        result[0].grids[id.z].cells[id.x][id.y].density -= source[0].grids[id.z].cells[id.x][id.y].density;        
+    }
+    if (result[0].grids[id.z].cells[id.x][id.y].rem > 2) {
+        result[0].grids[id.z].cells[id.x][id.y].rem -= 10;        
     }
 }
 
-kernel void setHeadVelocity(device SnakeGrids *current [[buffer(0)]],
-                            constant float3 *velocity [[buffer(1)]],
-                            constant uint *last [[buffer(2)]],
-                            uint3 id [[thread_position_in_grid]]) {
-    if (current[0].grids[id.z].cells[id.x][id.y].cell == 2) {
-        current[0].grids[id.z].cells[id.x][id.y].velocity = velocity[0];
-        current[0].grids[id.z].cells[id.x][id.y].velocityAllow = false;        
-    }
-}
 
 kernel void copySnake(constant SnakeGrids *source [[buffer(0)]],
                       device SnakeGrids *target [[buffer(1)]],
@@ -176,24 +149,25 @@ kernel void captureSnake(constant SnakeGrids *source [[buffer(0)]],
                          uint3 id [[thread_position_in_grid]]) {
     
     SnakeCell3D current = source[0].grids[id.z].cells[id.x][id.y];
-    if (current.cell != 3) { return; } // дальше выполняется лишь один тред из всей сетки
+    if (current.cell != 4) { return; } // дальше выполняется лишь один тред из всей сетки
     
     thread AdvectElement3D elements[STENCIL3D];
     fillStencill(elements, stencils[0].offsets, id, source[0].grids);
-    float3 c = float3(id);
     
     for (int i = 0; i < STENCIL3D; i++) {
         AdvectElement3D element = elements[i];
-        if (element.correspCell.cell == 2) {
-            float3 n = c + element.offset + element.correspCell.velocity;
-            if (length(c - n) == 0) {
-                target[0].grids[id.z].cells[id.x][id.y] = element.correspCell;
-                uint3 zid = uint3(c + element.offset);
-                target[0].grids[id.z].cells[zid.x][zid.y].cell = 1;
-                return;
-            }
+        float3 result = element.offset + element.correspCell.velocity;
+        if ((length(result) == 0) && (element.correspCell.rem == 22)) {
+            target[0].grids[id.z].cells[id.x][id.y] = element.correspCell;
+            uint3 tp = uint3(float3(id) + element.offset);
+            current.velocity = element.correspCell.velocity;
+            current.rem = 12;
+            current.cell = 0;
+            target[0].grids[tp.z].cells[tp.x][tp.y] = current;
         }
     }
+    
+
 }
 
 
